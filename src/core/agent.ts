@@ -24,7 +24,7 @@ export class Agent {
     this.model = config.model
     this.systemPrompt = config.systemPrompt
     this.temperature = config.temperature ?? 0.7
-    this.maxTokens = config.maxTokens ?? 2048
+    this.maxTokens = config.maxTokens ?? 256
     this.timeoutMs = config.timeoutMs ?? 60000
 
     this.tools = new Map()

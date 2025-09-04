@@ -15,6 +15,7 @@ export class AgentCLI extends BaseCLI {
       .option("-n, --name <name>", "agent name")
       .option("-m, --model <model>", "model to use")
       .option("-p, --provider <provider>", "model provider")
+      .option("-s, --system <prompt>", "system prompt")
       .option("-t, --template", "use interactive template")
       .action(async (options) => {
         await this.createAgent(options)
@@ -78,12 +79,13 @@ export class AgentCLI extends BaseCLI {
             type: "input",
             name: "model",
             message: "Model name:",
-            default: options.model || "anthropic/claude-3-sonnet",
+            default: options.model || "mistralai/mistral-7b-instruct:free",
           },
           {
             type: "input",
             name: "systemPrompt",
             message: "System prompt (optional):",
+            default: options.system || "You are a helpful, concise AI assistant.",
           },
           {
             type: "number",
@@ -95,7 +97,7 @@ export class AgentCLI extends BaseCLI {
             type: "number",
             name: "maxTokens",
             message: "Max tokens:",
-            default: 2048,
+            default: 256,
           },
         ])
 
@@ -106,6 +108,10 @@ export class AgentCLI extends BaseCLI {
           model: {
             provider: answers.provider,
             model: answers.model,
+            fallbackModels: [
+              "mistralai/mistral-small-3.2-24b-instruct:free",
+              "mistralai/mistral-small-3.1-24b-instruct:free",
+            ],
           },
           systemPrompt: answers.systemPrompt,
           temperature: answers.temperature,
@@ -117,8 +123,15 @@ export class AgentCLI extends BaseCLI {
           name: options.name,
           model: {
             provider: options.provider || "openrouter",
-            model: options.model,
+            model: options.model || "mistralai/mistral-7b-instruct:free",
+            fallbackModels: [
+              "mistralai/mistral-small-3.2-24b-instruct:free",
+              "mistralai/mistral-small-3.1-24b-instruct:free",
+            ],
           },
+          systemPrompt: options.system || "You are a helpful, concise AI assistant.",
+          temperature: options.temperature ?? 0.7,
+          maxTokens: options.maxTokens ?? 256,
         }
       }
 

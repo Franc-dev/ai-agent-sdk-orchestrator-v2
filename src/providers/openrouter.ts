@@ -13,46 +13,62 @@ export class OpenRouterProvider extends BaseModelProvider {
   }
 
   async generateText(prompt: string, options: GenerationOptions = {}): Promise<string> {
-    const modelsToTry = [this.config.model, ...(this.config.fallbackModels || [])]
+    const defaultFreeFallbacks = [
+      "mistralai/mistral-7b-instruct:free",
+      "mistralai/mistral-small-3.2-24b-instruct:free",
+      "mistralai/mistral-small-3.1-24b-instruct:free",
+    ]
+    const modelsToTry = [this.config.model, ...(this.config.fallbackModels?.length ? this.config.fallbackModels : defaultFreeFallbacks)]
+
+    const requestedMax = options.maxTokens ?? 2048
+    const tokenAttempts = Array.from(new Set([requestedMax, 1024, 512, 256])).filter((n) => n > 0)
 
     let lastError: Error | null = null
     for (const model of modelsToTry) {
-      const body = {
-        model,
-        messages: [{ role: "user", content: prompt }],
-        temperature: options.temperature ?? 0.7,
-        max_tokens: options.maxTokens ?? 2048,
-        top_p: options.topP,
-        frequency_penalty: options.frequencyPenalty,
-        presence_penalty: options.presencePenalty,
-        stop: options.stop,
-      }
-
-      try {
-        const response = await this.makeRequest(
-          `${this.baseUrl}/chat/completions`,
-          body,
-          options.timeout !== undefined ? { timeout: options.timeout } : {},
-        )
-
-        const data: any = await response.json()
-        if (data.error) {
-          throw new Error(`OpenRouter API error: ${data.error.message}`)
+      for (const maxTokens of tokenAttempts) {
+        const body = {
+          model,
+          messages: [{ role: "user", content: prompt }],
+          temperature: options.temperature ?? 0.7,
+          max_tokens: maxTokens,
+          top_p: options.topP,
+          frequency_penalty: options.frequencyPenalty,
+          presence_penalty: options.presencePenalty,
+          stop: options.stop,
         }
 
-        const choice = data.choices?.[0]
-        if (!choice) {
-          throw new Error("No response from OpenRouter API")
-        }
+        try {
+          const response = await this.makeRequest(
+            `${this.baseUrl}/chat/completions`,
+            body,
+            options.timeout !== undefined ? { timeout: options.timeout } : {},
+          )
 
-        if (data.usage) {
-          this.setLastTokenUsage(this.parseTokenUsage(data.usage)!)
-        }
+          const data: any = await response.json()
+          if (data.error) {
+            throw new Error(`OpenRouter API error: ${data.error.message}`)
+          }
 
-        return choice.message.content
-      } catch (error) {
-        lastError = error as Error
-        continue
+          const choice = data.choices?.[0]
+          if (!choice) {
+            throw new Error("No response from OpenRouter API")
+          }
+
+          if (data.usage) {
+            this.setLastTokenUsage(this.parseTokenUsage(data.usage)!)
+          }
+
+          return choice.message.content
+        } catch (error) {
+          lastError = error as Error
+          const message = String(lastError.message || "")
+          // If it's a credits error (402) or max_tokens issue, try lower tokens or next model
+          if (message.includes("HTTP 402") || message.toLowerCase().includes("credits")) {
+            continue
+          }
+          // For any other error, try next model
+          break
+        }
       }
     }
 
@@ -60,28 +76,36 @@ export class OpenRouterProvider extends BaseModelProvider {
   }
 
   async *generateStream(prompt: string, options: GenerationOptions = {}): AsyncGenerator<string> {
-    const modelsToTry = [this.config.model, ...(this.config.fallbackModels || [])]
+    const defaultFreeFallbacks = [
+      "mistralai/mistral-7b-instruct:free",
+      "mistralai/mistral-small-3.2-24b-instruct:free",
+      "mistralai/mistral-small-3.1-24b-instruct:free",
+    ]
+    const modelsToTry = [this.config.model, ...(this.config.fallbackModels?.length ? this.config.fallbackModels : defaultFreeFallbacks)]
+    const requestedMax = options.maxTokens ?? 2048
+    const tokenAttempts = Array.from(new Set([requestedMax, 1024, 512, 256])).filter((n) => n > 0)
     let lastError: Error | null = null
 
     for (const model of modelsToTry) {
-      const body = {
-        model,
-        messages: [{ role: "user", content: prompt }],
-        temperature: options.temperature ?? 0.7,
-        max_tokens: options.maxTokens ?? 2048,
-        top_p: options.topP,
-        frequency_penalty: options.frequencyPenalty,
-        presence_penalty: options.presencePenalty,
-        stop: options.stop,
-        stream: true,
-      }
+      for (const maxTokens of tokenAttempts) {
+        const body = {
+          model,
+          messages: [{ role: "user", content: prompt }],
+          temperature: options.temperature ?? 0.7,
+          max_tokens: maxTokens,
+          top_p: options.topP,
+          frequency_penalty: options.frequencyPenalty,
+          presence_penalty: options.presencePenalty,
+          stop: options.stop,
+          stream: true,
+        }
 
-      try {
-        const response = await this.makeRequest(
-          `${this.baseUrl}/chat/completions`,
-          body,
-          options.timeout !== undefined ? { timeout: options.timeout } : {},
-        )
+        try {
+          const response = await this.makeRequest(
+            `${this.baseUrl}/chat/completions`,
+            body,
+            options.timeout !== undefined ? { timeout: options.timeout } : {},
+          )
 
         if (!response.body) {
           throw new Error("No response body for streaming")
@@ -123,9 +147,14 @@ export class OpenRouterProvider extends BaseModelProvider {
         } finally {
           reader.releaseLock()
         }
-      } catch (error) {
-        lastError = error as Error
-        continue
+        } catch (error) {
+          lastError = error as Error
+          const message = String(lastError.message || "")
+          if (message.includes("HTTP 402") || message.toLowerCase().includes("credits")) {
+            continue
+          }
+          break
+        }
       }
     }
 
