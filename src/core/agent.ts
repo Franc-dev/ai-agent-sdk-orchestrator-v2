@@ -70,7 +70,7 @@ export class Agent {
     }
   }
 
-  async executeStream(prompt: string, context: ExecutionContext): AsyncGenerator<string> {
+  async *executeStream(prompt: string, context: ExecutionContext): AsyncGenerator<string> {
     const fullPrompt = this.buildPrompt(prompt, context)
 
     try {

@@ -2,6 +2,8 @@
 
 Follow these steps to install, configure, and run your first workflow.
 
+> Powered by OpenRouter: We use OpenRouter to access multiple models with a single API. Create an account and get your API key at [OpenRouter](https://openrouter.ai). New accounts typically receive free daily credits (around 50 credits/day), enough to run these examples.
+
 ## 1. Install the package
 
 ```bash
@@ -19,8 +21,10 @@ cd my-ai-project
 
 Copy env template and add your keys:
 
+Create `.env` in the project root (the examples automatically load this file). If you do not have a key, get one from [OpenRouter](https://openrouter.ai) — daily free credits are available:
+
 ```bash
-cp .env.example .env
+echo OPENROUTER_API_KEY=your_openrouter_api_key > .env
 ```
 
 Set required variables in `.env`:
@@ -41,10 +45,13 @@ ai-agent agent create --name "Assistant" --model "anthropic/claude-3-sonnet"
 ai-agent workflow create --template simple-chat
 ```
 
-## 6. Run the workflow (CLI)
+## 6. Run the example workflows
 
 ```bash
-ai-agent run simple-chat --input '{"message": "Hello!"}'
+npm run example:basic        # Simple single-agent workflow
+npm run example:multi-model  # Multi-agent, multi-model pipeline
+npm run example:stream       # Streaming responses to stdout
+npm run example:tools        # Custom tools demonstration
 ```
 
 ## Programmatic usage
@@ -61,7 +68,12 @@ const agent = new Agent({
   name: 'AI Assistant',
   model: {
     provider: 'openrouter',
-    model: 'anthropic/claude-3-sonnet',
+    model: 'anthropic/claude-3.5-sonnet',
+    fallbackModels: [
+      'mistralai/mistral-7b-instruct:free',
+      'mistralai/mistral-small-3.2-24b-instruct:free',
+      'mistralai/mistral-small-3.1-24b-instruct:free',
+    ],
     apiKey: process.env.OPENROUTER_API_KEY
   }
 })

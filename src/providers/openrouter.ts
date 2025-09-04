@@ -12,98 +12,123 @@ export class OpenRouterProvider extends BaseModelProvider {
   }
 
   async generateText(prompt: string, options: GenerationOptions = {}): Promise<string> {
-    const body = {
-      model: this.config.model,
-      messages: [{ role: "user", content: prompt }],
-      temperature: options.temperature ?? 0.7,
-      max_tokens: options.maxTokens ?? 2048,
-      top_p: options.topP,
-      frequency_penalty: options.frequencyPenalty,
-      presence_penalty: options.presencePenalty,
-      stop: options.stop,
+    const modelsToTry = [this.config.model, ...(this.config.fallbackModels || [])]
+
+    let lastError: Error | null = null
+    for (const model of modelsToTry) {
+      const body = {
+        model,
+        messages: [{ role: "user", content: prompt }],
+        temperature: options.temperature ?? 0.7,
+        max_tokens: options.maxTokens ?? 2048,
+        top_p: options.topP,
+        frequency_penalty: options.frequencyPenalty,
+        presence_penalty: options.presencePenalty,
+        stop: options.stop,
+      }
+
+      try {
+        const response = await this.makeRequest(
+          `${this.baseUrl}/chat/completions`,
+          body,
+          options.timeout !== undefined ? { timeout: options.timeout } : {},
+        )
+
+        const data: any = await response.json()
+        if (data.error) {
+          throw new Error(`OpenRouter API error: ${data.error.message}`)
+        }
+
+        const choice = data.choices?.[0]
+        if (!choice) {
+          throw new Error("No response from OpenRouter API")
+        }
+
+        if (data.usage) {
+          this.setLastTokenUsage(this.parseTokenUsage(data.usage)!)
+        }
+
+        return choice.message.content
+      } catch (error) {
+        lastError = error as Error
+        continue
+      }
     }
 
-    const response = await this.makeRequest(`${this.baseUrl}/chat/completions`, body, {
-      timeout: options.timeout,
-    })
-
-    const data = await response.json()
-
-    if (data.error) {
-      throw new Error(`OpenRouter API error: ${data.error.message}`)
-    }
-
-    const choice = data.choices?.[0]
-    if (!choice) {
-      throw new Error("No response from OpenRouter API")
-    }
-
-    // Set token usage
-    if (data.usage) {
-      this.setLastTokenUsage(this.parseTokenUsage(data.usage)!)
-    }
-
-    return choice.message.content
+    throw lastError || new Error("All models failed for OpenRouter provider")
   }
 
   async *generateStream(prompt: string, options: GenerationOptions = {}): AsyncGenerator<string> {
-    const body = {
-      model: this.config.model,
-      messages: [{ role: "user", content: prompt }],
-      temperature: options.temperature ?? 0.7,
-      max_tokens: options.maxTokens ?? 2048,
-      top_p: options.topP,
-      frequency_penalty: options.frequencyPenalty,
-      presence_penalty: options.presencePenalty,
-      stop: options.stop,
-      stream: true,
-    }
+    const modelsToTry = [this.config.model, ...(this.config.fallbackModels || [])]
+    let lastError: Error | null = null
 
-    const response = await this.makeRequest(`${this.baseUrl}/chat/completions`, body, {
-      timeout: options.timeout,
-    })
+    for (const model of modelsToTry) {
+      const body = {
+        model,
+        messages: [{ role: "user", content: prompt }],
+        temperature: options.temperature ?? 0.7,
+        max_tokens: options.maxTokens ?? 2048,
+        top_p: options.topP,
+        frequency_penalty: options.frequencyPenalty,
+        presence_penalty: options.presencePenalty,
+        stop: options.stop,
+        stream: true,
+      }
 
-    if (!response.body) {
-      throw new Error("No response body for streaming")
-    }
+      try {
+        const response = await this.makeRequest(
+          `${this.baseUrl}/chat/completions`,
+          body,
+          options.timeout !== undefined ? { timeout: options.timeout } : {},
+        )
 
-    const reader = response.body.getReader()
-    const decoder = new TextDecoder()
+        if (!response.body) {
+          throw new Error("No response body for streaming")
+        }
 
-    try {
-      while (true) {
-        const { done, value } = await reader.read()
-        if (done) break
+        const reader = response.body.getReader()
+        const decoder = new TextDecoder()
 
-        const chunk = decoder.decode(value, { stream: true })
-        const lines = chunk.split("\n").filter((line) => line.trim())
+        try {
+          while (true) {
+            const { done, value } = await reader.read()
+            if (done) break
 
-        for (const line of lines) {
-          if (line.startsWith("data: ")) {
-            const data = line.slice(6)
-            if (data === "[DONE]") return
+            const chunk = decoder.decode(value, { stream: true })
+            const lines = chunk.split("\n").filter((line) => line.trim())
 
-            try {
-              const parsed = JSON.parse(data)
-              const delta = parsed.choices?.[0]?.delta?.content
-              if (delta) {
-                yield delta
+            for (const line of lines) {
+              if (line.startsWith("data: ")) {
+                const data = line.slice(6)
+                if (data === "[DONE]") return
+
+                try {
+                  const parsed: any = JSON.parse(data)
+                  const delta = parsed.choices?.[0]?.delta?.content
+                  if (delta) {
+                    yield delta
+                  }
+
+                  if (parsed.usage) {
+                    this.setLastTokenUsage(this.parseTokenUsage(parsed.usage)!)
+                  }
+                } catch (error) {
+                  continue
+                }
               }
-
-              // Handle usage data in final chunk
-              if (parsed.usage) {
-                this.setLastTokenUsage(this.parseTokenUsage(parsed.usage)!)
-              }
-            } catch (error) {
-              // Skip invalid JSON chunks
-              continue
             }
           }
+          return
+        } finally {
+          reader.releaseLock()
         }
+      } catch (error) {
+        lastError = error as Error
+        continue
       }
-    } finally {
-      reader.releaseLock()
     }
+
+    throw lastError || new Error("All models failed for OpenRouter provider (stream)")
   }
 
   estimateTokens(text: string): number {

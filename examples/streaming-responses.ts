@@ -1,8 +1,11 @@
+/* eslint-env node */
+/* global console, process, require, module */
 import { AgentOrchestrator, Agent } from "../src"
+import chalk from "chalk"
 
 async function streamingResponsesExample() {
-  console.log("🌊 Streaming Responses Example")
-  console.log("=".repeat(50))
+  console.log(chalk.cyan("🌊 Streaming Responses Example"))
+  console.log(chalk.gray("=".repeat(50)))
 
   const orchestrator = new AgentOrchestrator()
 
@@ -11,8 +14,13 @@ async function streamingResponsesExample() {
     name: "Streaming AI Agent",
     model: {
       provider: "openrouter",
-      model: "anthropic/claude-3-sonnet",
+      model: "anthropic/claude-3.5-sonnet",
       apiKey: process.env.OPENROUTER_API_KEY || "your-api-key",
+      fallbackModels: [
+        "mistralai/mistral-7b-instruct:free",
+        "mistralai/mistral-small-3.2-24b-instruct:free",
+        "mistralai/mistral-small-3.1-24b-instruct:free",
+      ],
     },
     systemPrompt: "You are a helpful AI assistant. Provide detailed, informative responses.",
   })
@@ -21,9 +29,9 @@ async function streamingResponsesExample() {
 
   const prompt = "Explain the concept of machine learning and its applications in modern technology."
 
-  console.log("Prompt:", prompt)
-  console.log("\nStreaming response:")
-  console.log("─".repeat(40))
+  console.log(chalk.bold("Prompt:"), prompt)
+  console.log("\n" + chalk.magenta("Streaming response:"))
+  console.log(chalk.gray("─".repeat(40)))
 
   const context = {
     workflowId: "streaming-test",
@@ -43,8 +51,8 @@ async function streamingResponsesExample() {
   }
 
   console.log("\n")
-  console.log("─".repeat(40))
-  console.log("Full response length:", fullResponse.length, "characters")
+  console.log(chalk.gray("─".repeat(40)))
+  console.log(chalk.bold("Full response length:"), fullResponse.length, "characters")
 
   await orchestrator.shutdown()
 }

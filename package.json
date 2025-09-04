@@ -34,8 +34,10 @@
     "lint:fix": "eslint src --ext .ts,.tsx --fix",
     "type-check": "tsc --noEmit",
     "prepublishOnly": "npm run build",
-    "example:basic": "tsx examples/basic-workflow.ts",
-    "example:multi-model": "tsx examples/multi-model-agent.ts"
+    "example:basic": "tsx --env-file=.env examples/basic-workflow.ts",
+    "example:multi-model": "tsx --env-file=.env examples/multi-model-agent.ts",
+    "example:stream": "tsx --env-file=.env examples/streaming-responses.ts",
+    "example:tools": "tsx --env-file=.env examples/custom-tools.ts"
   },
   "keywords": [
     "ai",
@@ -48,7 +50,7 @@
     "typescript",
     "sdk"
   ],
-  "author": "Your Name",
+  "author": "Francis Mwaniki",
   "license": "MIT",
   "devDependencies": {
     "@types/node": "^20.10.0",

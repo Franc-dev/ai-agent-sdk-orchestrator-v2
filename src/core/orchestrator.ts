@@ -2,19 +2,20 @@ import { EventEmitter } from "eventemitter3"
 import { Agent } from "./agent"
 import { Workflow } from "./workflow"
 import { Logger } from "../utils/logger"
-import type { AgentConfig, WorkflowConfig, ExecutionContext, LogLevel, Plugin } from "../types"
+import type { AgentConfig, WorkflowConfig, ExecutionContext, LogLevel } from "../types"
+import type { BasePlugin } from "../plugins/base"
 
 export interface OrchestratorConfig {
   logLevel?: LogLevel
   maxConcurrentExecutions?: number
   defaultTimeout?: number
-  plugins?: Plugin[]
+  plugins?: BasePlugin[]
 }
 
 export class AgentOrchestrator extends EventEmitter {
   private agents = new Map<string, Agent>()
   private workflows = new Map<string, Workflow>()
-  private plugins: Plugin[] = []
+  private plugins: BasePlugin[] = []
   private logger: Logger
   private config: Required<OrchestratorConfig>
   private activeExecutions = new Map<string, ExecutionContext>()
@@ -29,7 +30,7 @@ export class AgentOrchestrator extends EventEmitter {
       plugins: config.plugins || [],
     }
 
-    this.logger = new Logger(this.config.logLevel)
+    this.logger = new Logger({ level: this.config.logLevel })
     this.plugins = [...this.config.plugins]
 
     this.logger.info("AgentOrchestrator initialized", { config: this.config })
@@ -78,10 +79,10 @@ export class AgentOrchestrator extends EventEmitter {
   }
 
   // Plugin Management
-  async addPlugin(plugin: Plugin): Promise<void> {
+  async addPlugin(plugin: BasePlugin): Promise<void> {
     await plugin.initialize(this)
     this.plugins.push(plugin)
-    this.logger.info(`Plugin added: ${plugin.name}`, { version: plugin.version })
+    this.logger.info(`Plugin added: ${plugin.metadata.name}`, { version: plugin.metadata.version })
     this.emit("plugin:added", plugin)
   }
 
@@ -128,7 +129,7 @@ export class AgentOrchestrator extends EventEmitter {
 
       return context
     } catch (error) {
-      this.logger.error(`Execution failed: ${executionId}`, { error: error.message })
+      this.logger.error(`Execution failed: ${executionId}`, { error: (error as any).message })
       this.emit("execution:failed", { executionId, context, error })
       throw error
     } finally {
@@ -139,8 +140,8 @@ export class AgentOrchestrator extends EventEmitter {
   private async executeWorkflow(workflow: Workflow, context: ExecutionContext): Promise<any> {
     // Execute plugins before workflow
     for (const plugin of this.plugins) {
-      if (plugin.beforeStep) {
-        await plugin.beforeStep(context)
+      if ((plugin as any).beforeStep) {
+        await (plugin as any).beforeStep(context)
       }
     }
 
@@ -149,8 +150,8 @@ export class AgentOrchestrator extends EventEmitter {
 
       // Execute plugins after workflow
       for (const plugin of this.plugins) {
-        if (plugin.afterStep) {
-          await plugin.afterStep(context, result)
+        if ((plugin as any).afterStep) {
+          await (plugin as any).afterStep(context, result)
         }
       }
 
@@ -158,8 +159,8 @@ export class AgentOrchestrator extends EventEmitter {
     } catch (error) {
       // Execute plugin error handlers
       for (const plugin of this.plugins) {
-        if (plugin.onError) {
-          await plugin.onError(context, error as Error)
+        if ((plugin as any).onError) {
+          await (plugin as any).onError(context, error as Error)
         }
       }
       throw error

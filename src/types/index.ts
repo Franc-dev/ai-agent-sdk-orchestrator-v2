@@ -17,6 +17,7 @@ export interface ModelConfig {
   apiKey?: string
   baseUrl?: string
   headers?: Record<string, string>
+  fallbackModels?: string[]
 }
 
 export interface ToolConfig {
