@@ -1,33 +1,31 @@
 # AI Agent SDK Orchestrator
 
-A comprehensive TypeScript SDK for building robust AI agent workflows with multi-model support, logging, and orchestration capabilities.
+Robust TypeScript SDK for building AI agent workflows with multi-model support, orchestration, observability, and plugins.
 
 ## Features
 
-- 🤖 **Multi-Model Support** - OpenRouter, Vercel AI Gateway, OpenAI, and custom providers
-- 🔄 **Workflow Orchestration** - Sequential and parallel step execution
-- 🛠️ **Tool Integration** - Built-in and custom tool support
-- 📊 **Advanced Logging** - Comprehensive execution tracking and observability
-- 🔌 **Plugin System** - Extensible architecture for custom functionality
-- ⚡ **Streaming Support** - Real-time response streaming
-- 🔄 **Retry Logic** - Configurable retry mechanisms with backoff
-- 🎯 **Type Safety** - Full TypeScript support with strict typing
+- 🤖 **Multi-model providers**: OpenRouter, Vercel AI Gateway, OpenAI, and custom
+- 🔄 **Workflow orchestration**: Sequential and parallel step execution
+- 🛠️ **Tool integration**: Built-in and custom tools
+- 📊 **Observability**: Structured logs, tracing, metrics
+- 🔌 **Plugin system**: Extensible architecture
+- ⚡ **Streaming**: Real-time token streams
+- 🔁 **Retries**: Configurable backoff strategies
+- 🎯 **Type safety**: Strict TypeScript types
 
 ## Installation
 
-\`\`\`bash
+```bash
 npm install ai-agent-sdk-orchestrator
-\`\`\`
+```
 
-## Quick Start
+## Quick start
 
-\`\`\`typescript
+```typescript
 import { AgentOrchestrator, Agent, Workflow } from 'ai-agent-sdk-orchestrator'
 
 // Create an orchestrator
-const orchestrator = new AgentOrchestrator({
-  logLevel: 'info'
-})
+const orchestrator = new AgentOrchestrator({ logLevel: 'info' })
 
 // Define an agent
 const agent = new Agent({
@@ -46,12 +44,7 @@ const workflow = new Workflow({
   id: 'simple-chat',
   name: 'Simple Chat Workflow',
   steps: [
-    {
-      id: 'respond',
-      name: 'Generate Response',
-      type: 'agent',
-      agentId: 'assistant'
-    }
+    { id: 'respond', name: 'Generate Response', type: 'agent', agentId: 'assistant' }
   ]
 })
 
@@ -59,22 +52,52 @@ const workflow = new Workflow({
 orchestrator.registerAgent(agent)
 orchestrator.registerWorkflow(workflow)
 
-const result = await orchestrator.execute('simple-chat', {
-  message: 'Hello, how are you?'
-})
-
+const result = await orchestrator.execute('simple-chat', { message: 'Hello, how are you?' })
 console.log(result.output)
-\`\`\`
+```
+
+## CLI usage
+
+After installing, the CLI is available as `ai-agent`.
+
+```bash
+ai-agent --help
+```
+
+Common scripts in this repo:
+
+```bash
+npm run build
+npm run dev
+npm test
+```
+
+## Examples
+
+- `examples/basic-workflow.ts`
+- `examples/multi-model-agent.ts`
+- `examples/streaming-responses.ts`
+
+Run an example:
+
+```bash
+npm run example:basic
+```
 
 ## Documentation
 
-- [Getting Started](./docs/getting-started.md)
-- [Agent Configuration](./docs/agents.md)
-- [Workflow Design](./docs/workflows.md)
-- [Model Providers](./docs/providers.md)
-- [Plugin Development](./docs/plugins.md)
-- [API Reference](./docs/api.md)
+- Getting Started: `docs/getting-started.md`
+
+## Contributing
+
+Issues and PRs are welcome. Please run lint and tests before submitting:
+
+```bash
+npm run lint && npm run type-check && npm test
+```
 
 ## License
 
 MIT
+
+

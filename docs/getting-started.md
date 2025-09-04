@@ -1,55 +1,55 @@
-# Getting Started with AI Agent SDK Orchestrator
+# Getting Started
 
-## Installation
+Follow these steps to install, configure, and run your first workflow.
 
-\`\`\`bash
+## 1. Install the package
+
+```bash
 npm install ai-agent-sdk-orchestrator
-\`\`\`
+```
 
-## Quick Start
+## 2. Initialize a project (CLI)
 
-### 1. Initialize a Project
-
-\`\`\`bash
+```bash
 npx ai-agent init my-ai-project
 cd my-ai-project
-\`\`\`
+```
 
-### 2. Configure Environment
+## 3. Configure environment
 
-Copy `.env.example` to `.env` and add your API keys:
+Copy env template and add your keys:
 
-\`\`\`bash
+```bash
 cp .env.example .env
-\`\`\`
+```
 
-Edit `.env`:
-\`\`\`
+Set required variables in `.env`:
+```
 OPENROUTER_API_KEY=your_openrouter_api_key
 OPENAI_API_KEY=your_openai_api_key
-\`\`\`
+```
 
-### 3. Create Your First Agent
+## 4. Create an agent (CLI)
 
-\`\`\`bash
+```bash
 ai-agent agent create --name "Assistant" --model "anthropic/claude-3-sonnet"
-\`\`\`
+```
 
-### 4. Create a Workflow
+## 5. Create a workflow (CLI)
 
-\`\`\`bash
+```bash
 ai-agent workflow create --template simple-chat
-\`\`\`
+```
 
-### 5. Run the Workflow
+## 6. Run the workflow (CLI)
 
-\`\`\`bash
+```bash
 ai-agent run simple-chat --input '{"message": "Hello!"}'
-\`\`\`
+```
 
-## Programmatic Usage
+## Programmatic usage
 
-\`\`\`typescript
+```typescript
 import { AgentOrchestrator, Agent, Workflow } from 'ai-agent-sdk-orchestrator'
 
 // Create orchestrator
@@ -73,26 +73,21 @@ orchestrator.registerAgent(agent)
 const workflow = new Workflow({
   id: 'chat',
   name: 'Chat Workflow',
-  steps: [{
-    id: 'respond',
-    type: 'agent',
-    agentId: 'assistant'
-  }]
+  steps: [
+    { id: 'respond', type: 'agent', agentId: 'assistant' }
+  ]
 })
 
 orchestrator.registerWorkflow(workflow)
 
 // Execute
-const result = await orchestrator.execute('chat', {
-  message: 'Hello!'
-})
-
+const result = await orchestrator.execute('chat', { message: 'Hello!' })
 console.log(result.variables.respond)
-\`\`\`
+```
 
-## Next Steps
+## Next steps
 
-- [Agent Configuration](./agents.md)
-- [Workflow Design](./workflows.md)
-- [Plugin Development](./plugins.md)
-- [Model Providers](./providers.md)
+- Agent Configuration: `docs/agents.md`
+- Workflow Design: `docs/workflows.md`
+- Plugin Development: `docs/plugins.md`
+- Model Providers: `docs/providers.md`
