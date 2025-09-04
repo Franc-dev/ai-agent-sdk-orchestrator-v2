@@ -8,11 +8,14 @@ export class ProjectCLI extends BaseCLI {
     const projectCmd = this.program.command("project").description("Manage projects")
 
     projectCmd
-      .command("init")
+      .command("init [name]")
       .description("Initialize a new project")
       .option("-n, --name <name>", "project name")
       .option("-t, --template <template>", "project template")
-      .action(async (options) => {
+      .action(async (name, options) => {
+        if (typeof name === "string" && name.trim().length > 0) {
+          options.name = options.name || name.trim()
+        }
         await this.initProject(options)
       })
 

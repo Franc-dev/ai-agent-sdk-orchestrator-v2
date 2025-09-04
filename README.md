@@ -47,11 +47,38 @@ Or use npx locally:
 npx ai-agent-sdk-orchestrator@latest --help
 ```
 
-Initialize a project:
+Initialize a project (use the project subcommand):
 
 ```bash
-npx ai-agent-sdk-orchestrator init my-ai-project
+# via npx
+npx ai-agent-sdk-orchestrator project init my-ai-project
 cd my-ai-project
+
+# or if installed globally
+ai-agent project init my-ai-project
+```
+
+Notes:
+
+- The positional value `my-ai-project` is used as the default for `--name` during the interactive prompt. Press Enter to accept it.
+ 
+Open common resources quickly:
+
+```bash
+# Open docs or repo in your default browser
+ai-agent open --docs
+ai-agent open --repo
+
+# Open project folders in your OS file manager
+ai-agent open --project
+ai-agent open --agents
+ai-agent open --workflows
+ai-agent open --plugins
+ai-agent open --logs
+
+# Open any URL or path
+ai-agent open --url https://example.com
+ai-agent open --path C:\\some\\folder
 ```
 
 Agents and workflows:
@@ -65,6 +92,38 @@ ai-agent agent list
 
 # Run a workflow (expects ./workflows/<id>.json)
 ai-agent run <workflowId> --input '{"message":"Hello"}'
+```
+
+## Install and Upgrade
+
+Install from npm registry:
+
+```bash
+# project-local (recommended)
+npm i ai-agent-sdk-orchestrator@latest
+
+# or install the CLI globally
+npm i -g ai-agent-sdk-orchestrator@latest
+```
+
+Install directly from a GitHub branch/tag (useful for testing diffs with main):
+
+```bash
+# main branch
+npm i github:Franc-dev/ai-agent-sdk-orchestrator-v2#main
+
+# a feature branch or tag
+npm i github:Franc-dev/ai-agent-sdk-orchestrator-v2#my-branch
+npm i github:Franc-dev/ai-agent-sdk-orchestrator-v2#v1.0.3
+```
+
+If upgrade seems stuck, clear cache and reinstall:
+
+```bash
+npm cache verify
+npm cache clean --force
+rm -rf node_modules package-lock.json
+npm i
 ```
 
 ## Programmatic usage

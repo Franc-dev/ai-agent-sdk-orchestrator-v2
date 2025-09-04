@@ -67,6 +67,32 @@ ai-agent agent list
 ai-agent run <workflowId> --input '{"message":"Hello"}'
 ```
 
+## Install and Upgrade
+
+Install from npm:
+
+```bash
+npm i ai-agent-sdk-orchestrator@latest
+# or global CLI
+npm i -g ai-agent-sdk-orchestrator@latest
+```
+
+Install from GitHub branch/tag:
+
+```bash
+npm i github:Franc-dev/ai-agent-sdk-orchestrator-v2#main
+npm i github:Franc-dev/ai-agent-sdk-orchestrator-v2#v1.0.3
+```
+
+Troubleshooting upgrades:
+
+```bash
+npm cache verify
+npm cache clean --force
+rm -rf node_modules package-lock.json
+npm i
+```
+
 ## Programmatic usage
 
 ```ts

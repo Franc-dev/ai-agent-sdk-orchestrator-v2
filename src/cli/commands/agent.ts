@@ -99,7 +99,18 @@ export class AgentCLI extends BaseCLI {
           },
         ])
 
-        config = answers
+        // Normalize interactive answers into AgentConfig shape
+        config = {
+          name: answers.name,
+          description: answers.description,
+          model: {
+            provider: answers.provider,
+            model: answers.model,
+          },
+          systemPrompt: answers.systemPrompt,
+          temperature: answers.temperature,
+          maxTokens: answers.maxTokens,
+        }
       } else {
         // Command line mode
         config = {

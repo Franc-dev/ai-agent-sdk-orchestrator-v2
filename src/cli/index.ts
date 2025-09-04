@@ -1,13 +1,16 @@
 import { Command } from "commander"
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+import pkg from "../../package.json" assert { type: "json" }
 import chalk from "chalk"
 import { AgentCLI } from "./commands/agent"
 import { WorkflowCLI } from "./commands/workflow"
 import { ProjectCLI } from "./commands/project"
 import { RunCLI } from "./commands/run"
+import { OpenCLI } from "./commands/open"
 
 const program = new Command()
 
-program.name("ai-agent").description("AI Agent SDK Orchestrator CLI").version("1.0.0")
+program.name("ai-agent").description("AI Agent SDK Orchestrator CLI").version(pkg.version)
 
 // Global options
 program
@@ -20,6 +23,7 @@ new AgentCLI(program)
 new WorkflowCLI(program)
 new ProjectCLI(program)
 new RunCLI(program)
+new OpenCLI(program)
 
 // Error handling: override only for real errors; allow --help/--version to exit cleanly
 program.exitOverride((err) => {

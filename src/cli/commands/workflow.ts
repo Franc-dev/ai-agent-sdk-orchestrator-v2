@@ -6,6 +6,26 @@ import { BaseCLI } from "./base"
 export class WorkflowCLI extends BaseCLI {
   protected setupCommands(): void {
     const workflowCmd = this.program.command("workflow").description("Manage workflows")
+    workflowCmd
+      .command("create")
+      .description("Create a new workflow")
+      .option("-i, --id <id>", "workflow id")
+      .option("-n, --name <name>", "workflow name")
+      .option("-a, --agent <agentId>", "single agent id for simple workflow")
+      .action(async (options) => {
+        const id = options.id || (options.name || "workflow").toLowerCase().replace(/\s+/g, "-")
+        const wf = {
+          id,
+          name: options.name || id,
+          steps: options.agent ? [{ id: "step-1", type: "agent", agentId: options.agent }] : [],
+        }
+        const fs = await import("fs/promises")
+        const path = await import("path")
+        const workflowsDir = path.join(process.cwd(), "workflows")
+        await fs.mkdir(workflowsDir, { recursive: true })
+        await fs.writeFile(path.join(workflowsDir, `${id}.json`), JSON.stringify(wf, null, 2))
+        this.success(`Workflow created: ${id}`)
+      })
 
     workflowCmd
       .command("create")
