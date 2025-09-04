@@ -1,6 +1,6 @@
 {
   "name": "ai-agent-sdk-orchestrator",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "A comprehensive TypeScript SDK for building robust AI agent workflows with multi-model support, logging, and orchestration capabilities",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -109,10 +109,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/ai-agent-sdk-orchestrator.git"
+    "url": "https://github.com/Franc-dev/ai-agent-sdk-orchestrator-v2.git"
   },
   "bugs": {
-    "url": "https://github.com/yourusername/ai-agent-sdk-orchestrator/issues"
+    "url": "https://github.com/Franc-dev/ai-agent-sdk-orchestrator-v2/issues"
   },
-  "homepage": "https://github.com/yourusername/ai-agent-sdk-orchestrator#readme"
+  "homepage": "https://github.com/Franc-dev/ai-agent-sdk-orchestrator-v2#readme"
 }

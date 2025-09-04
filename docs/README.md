@@ -31,6 +31,73 @@ npm run example:stream       # Streaming responses to stdout
 npm run example:tools        # Custom tools demonstration
 ```
 
+## CLI Usage
+
+The package ships with a CLI `ai-agent`.
+
+Install globally (optional):
+
+```bash
+npm i -g ai-agent-sdk-orchestrator
+```
+
+Or use npx locally:
+
+```bash
+npx ai-agent-sdk-orchestrator@latest --help
+```
+
+Initialize a project:
+
+```bash
+npx ai-agent-sdk-orchestrator init my-ai-project
+cd my-ai-project
+```
+
+Agents and workflows:
+
+```bash
+# Create an agent interactively
+ai-agent agent create
+
+# List agents
+ai-agent agent list
+
+# Run a workflow (expects ./workflows/<id>.json)
+ai-agent run <workflowId> --input '{"message":"Hello"}'
+```
+
+## Programmatic usage
+
+```ts
+import { AgentOrchestrator, Agent, Workflow } from "ai-agent-sdk-orchestrator"
+
+const orchestrator = new AgentOrchestrator()
+
+const agent = new Agent({
+  id: "assistant",
+  name: "AI Assistant",
+  model: {
+    provider: "openrouter",
+    model: "anthropic/claude-3.5-sonnet",
+    apiKey: process.env.OPENROUTER_API_KEY!,
+  },
+})
+
+orchestrator.registerAgent(agent)
+
+const workflow = new Workflow({
+  id: "chat",
+  name: "Chat Workflow",
+  steps: [{ id: "respond", type: "agent", agentId: "assistant" }],
+})
+
+orchestrator.registerWorkflow(workflow)
+
+const result = await orchestrator.execute("chat", { message: "Hello!" })
+console.log(result.variables.respond)
+```
+
 The examples use OpenRouter and include fallbacks to free Mistral models:
 
 ```
