@@ -129,6 +129,20 @@ ai-agent run chat --input '{"message":"Hello"}'
 # Expects ./workflows/chat.json and referenced agents to exist
 ```
 
+JSON quoting on different shells:
+
+```bash
+# PowerShell / CMD
+ai-agent run chat c
+
+# Git Bash / WSL / macOS/Linux shells
+ai-agent run chat --input '{"message":"Hello"}'
+
+# Or use a file
+echo {"message":"Hello"} > input.json
+ai-agent run chat --file input.json
+```
+
 Tip: create agents first so you can reference their IDs in steps:
 
 ```bash
@@ -144,7 +158,21 @@ ai-agent agent create
 ai-agent agent list
 
 # Run a workflow (expects ./workflows/<id>.json)
-ai-agent run <workflowId> --input '{"message":"Hello"}'
+ai-agent run <workflowId> --input '{"message":"Hello"}'  # see JSON quoting notes below
+```
+
+Examples for a workflow id `fire-coding`:
+
+```bash
+# PowerShell / CMD
+ai-agent run fire-coding --input "{\"message\":\"hello fire code\"}"
+
+# Git Bash / WSL / macOS/Linux shells
+ai-agent run fire-coding --input '{"message":"hello fire code"}'
+
+# Using a file (works everywhere)
+echo {"message":"hello fire code"} > input.json
+ai-agent run fire-coding --file input.json
 ```
 
 ## Install and Upgrade

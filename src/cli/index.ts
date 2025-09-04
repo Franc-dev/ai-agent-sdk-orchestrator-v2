@@ -1,3 +1,4 @@
+import "dotenv/config"
 import { Command } from "commander"
 // eslint-disable-next-line @typescript-eslint/consistent-type-imports
 import pkg from "../../package.json" assert { type: "json" }

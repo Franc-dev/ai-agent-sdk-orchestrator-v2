@@ -1,6 +1,6 @@
 {
   "name": "ai-agent-sdk-orchestrator",
-  "version": "1.0.9",
+  "version": "1.1.0",
   "description": "A comprehensive TypeScript SDK for building robust AI agent workflows with multi-model support, logging, and orchestration capabilities",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -75,6 +75,7 @@
     "class-variance-authority": "0.7.1",
     "clsx": "2.1.1",
     "commander": "^11.1.0",
+    "dotenv": "^16.4.5",
     "crypto": "1.0.1",
     "eventemitter3": "^5.0.1",
     "fs": "0.0.1-security",

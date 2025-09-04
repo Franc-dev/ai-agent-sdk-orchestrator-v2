@@ -39,9 +39,8 @@ export abstract class BaseModelProvider {
       "User-Agent": "ai-agent-sdk-orchestrator/1.0.0",
     }
 
-    if (this.config.apiKey) {
-      headers["Authorization"] = `Bearer ${this.config.apiKey}`
-    }
+    const apiKey = this.config.apiKey || process.env.OPENROUTER_API_KEY || process.env.OPENAI_API_KEY
+    if (apiKey) headers["Authorization"] = `Bearer ${apiKey}`
 
     if (this.config.headers) {
       Object.assign(headers, this.config.headers)
