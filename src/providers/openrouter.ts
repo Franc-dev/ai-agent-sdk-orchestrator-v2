@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 import { BaseModelProvider, type GenerationOptions } from "./base"
 import type { ModelConfig } from "../types"
 
