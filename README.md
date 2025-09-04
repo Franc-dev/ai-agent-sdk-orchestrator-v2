@@ -91,6 +91,49 @@ ai-agent auth set-openrouter sk-or-v1-...
 ai-agent auth show
 ```
 
+### Workflows via CLI
+
+Create a simple workflow (single agent):
+
+```bash
+ai-agent workflow create --id chat --name "Chat" --agent assistant
+# creates workflows/chat.json with a single agent step using agentId "assistant"
+```
+
+Interactive workflow builder (multiple steps):
+
+```bash
+ai-agent workflow create
+# Prompts for: name/description/parallel → add steps repeatedly
+# Step types: agent, tool, condition, loop, parallel
+# For agent step you’ll be asked for agentId (e.g., "assistant")
+# Saves to workflows/<generated-id>.json
+```
+
+List workflows:
+
+```bash
+ai-agent workflow list
+```
+
+Validate a workflow file:
+
+```bash
+ai-agent workflow validate chat
+```
+
+Run a workflow:
+
+```bash
+ai-agent run chat --input '{"message":"Hello"}'
+# Expects ./workflows/chat.json and referenced agents to exist
+```
+
+Tip: create agents first so you can reference their IDs in steps:
+
+```bash
+ai-agent agent create
+```
 Agents and workflows:
 
 ```bash
