@@ -48,9 +48,9 @@ Screenshots of typical outputs are available under `public/examples/` and embedd
 <p align="center"><strong>Multi-Model Pipeline</strong></p>
 <p align="center"><img src="/multi-model-1.png" alt="Multi-Model (1)" /></p>
 <p align="center"><img src="/multi-model-2.png" alt="Multi-Model (2)" /></p>
-<p align="center"><img src="/multi-model-3.png" alt="Multi-Model (3)" /></p>
+<p align="center"><img src="/examples/multi-model-3.png" alt="Multi-Model (3)" /></p>
 
-<p align="center"><img src="/stream.png" alt="Streaming Responses" /></p>
+<p align="center"><img src="./public/examples/stream.png" alt="Streaming Responses" /></p>
 
 <p align="center"><img src="/tools.png" alt="Custom Tools" /></p>
 
