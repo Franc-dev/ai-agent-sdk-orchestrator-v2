@@ -30,6 +30,13 @@ export class AgentCLI extends BaseCLI {
       })
 
     agentCmd
+      .command("show <agentId>")
+      .description("Show details for an agent")
+      .action(async (agentId) => {
+        await this.showAgent(agentId)
+      })
+
+    agentCmd
       .command("test <agentId>")
       .description("Test an agent")
       .option("-p, --prompt <prompt>", "test prompt")
@@ -192,6 +199,25 @@ export class AgentCLI extends BaseCLI {
           console.log()
         })
       }
+    } catch (error) {
+      await this.handleError(error as Error)
+    }
+  }
+
+  private async showAgent(agentId: string): Promise<void> {
+    try {
+      const agentPath = join(process.cwd(), "agents", `${agentId}.json`)
+      const content = await fs.readFile(agentPath, "utf-8")
+      const agent = JSON.parse(content)
+      console.log("\nAgent Details:")
+      console.log("─".repeat(40))
+      console.log(`ID: ${agent.id || agentId}`)
+      console.log(`Name: ${agent.name || "(unknown)"}`)
+      console.log(`Provider: ${agent.model?.provider || "unknown"}`)
+      console.log(`Model: ${agent.model?.model || "unknown"}`)
+      if (agent.systemPrompt) console.log(`System: ${agent.systemPrompt}`)
+      if (agent.maxTokens) console.log(`Max tokens: ${agent.maxTokens}`)
+      if (agent.temperature !== undefined) console.log(`Temperature: ${agent.temperature}`)
     } catch (error) {
       await this.handleError(error as Error)
     }

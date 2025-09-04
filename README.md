@@ -93,6 +93,12 @@ ai-agent auth show
 
 ### Workflows via CLI
 
+Tip: create agents first so you can reference their IDs in steps:
+
+```bash
+ai-agent agent create
+```
+
 Create a simple workflow (single agent):
 
 ```bash
@@ -143,11 +149,7 @@ echo {"message":"Hello"} > input.json
 ai-agent run chat --file input.json
 ```
 
-Tip: create agents first so you can reference their IDs in steps:
-
-```bash
-ai-agent agent create
-```
+ 
 Agents and workflows:
 
 ```bash
@@ -157,8 +159,14 @@ ai-agent agent create
 # List agents
 ai-agent agent list
 
+# Show an agent's details (ID, model, etc.)
+ai-agent agent show <agentId>
+
 # Run a workflow (expects ./workflows/<id>.json)
 ai-agent run <workflowId> --input '{"message":"Hello"}'  # see JSON quoting notes below
+
+# Show a workflow's details (ID, name, steps)
+ai-agent workflow show <workflowId>
 ```
 
 Examples for a workflow id `fire-coding`:

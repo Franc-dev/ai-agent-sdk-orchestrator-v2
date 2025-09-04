@@ -27,6 +27,13 @@ export class WorkflowCLI extends BaseCLI {
       })
 
     workflowCmd
+      .command("show <workflowId>")
+      .description("Show details for a workflow")
+      .action(async (workflowId) => {
+        await this.showWorkflow(workflowId)
+      })
+
+    workflowCmd
       .command("run <workflowId>")
       .description("Run a workflow")
       .option("-i, --input <input>", "input data (JSON)")
@@ -237,6 +244,22 @@ export class WorkflowCLI extends BaseCLI {
           console.log()
         })
       }
+    } catch (error) {
+      await this.handleError(error as Error)
+    }
+  }
+
+  private async showWorkflow(workflowId: string): Promise<void> {
+    try {
+      const workflowsDir = join(process.cwd(), "workflows")
+      const content = await fs.readFile(join(workflowsDir, `${workflowId}.json`), "utf-8")
+      const wf = JSON.parse(content)
+      console.log("\nWorkflow Details:")
+      console.log("─".repeat(40))
+      console.log(`ID: ${wf.id || workflowId}`)
+      console.log(`Name: ${wf.name || "(unknown)"}`)
+      console.log(`Steps: ${Array.isArray(wf.steps) ? wf.steps.length : 0}`)
+      if (wf.parallel) console.log("Parallel: Yes")
     } catch (error) {
       await this.handleError(error as Error)
     }
