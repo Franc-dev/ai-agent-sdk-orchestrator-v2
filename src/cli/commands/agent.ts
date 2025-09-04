@@ -191,6 +191,7 @@ export class AgentCLI extends BaseCLI {
         console.log("─".repeat(80))
         agents.forEach((agent) => {
           console.log(`${agent.name} (${agent.id})`)
+          console.log(`  ID: ${agent.id}`)
           console.log(`  Provider: ${agent.model?.provider || "unknown"}`)
           console.log(`  Model: ${agent.model?.model || "unknown"}`)
           if (agent.description) {

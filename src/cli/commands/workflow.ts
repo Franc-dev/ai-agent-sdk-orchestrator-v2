@@ -235,8 +235,13 @@ export class WorkflowCLI extends BaseCLI {
         console.log("\nWorkflows:")
         console.log("─".repeat(80))
         workflows.forEach((workflow) => {
+          const stepIds = Array.isArray(workflow.steps)
+            ? workflow.steps.map((s: any) => s.id).filter(Boolean).join(", ")
+            : ""
           console.log(`${workflow.name} (${workflow.id})`)
+          console.log(`  ID: ${workflow.id}`)
           console.log(`  Steps: ${workflow.steps?.length || 0}`)
+          if (stepIds) console.log(`  Step IDs: ${stepIds}`)
           console.log(`  Parallel: ${workflow.parallel ? "Yes" : "No"}`)
           if (workflow.description) {
             console.log(`  Description: ${workflow.description}`)

@@ -138,8 +138,11 @@ ai-agent run chat --input '{"message":"Hello"}'
 JSON quoting on different shells:
 
 ```bash
-# PowerShell / CMD
-ai-agent run chat c
+# PowerShell
+ai-agent run chat --input "{\"message\":\"Hello\"}"
+
+# Windows CMD
+ai-agent run chat --input "{""message"":""Hello""}"
 
 # Git Bash / WSL / macOS/Linux shells
 ai-agent run chat --input '{"message":"Hello"}'
@@ -172,8 +175,11 @@ ai-agent workflow show <workflowId>
 Examples for a workflow id `fire-coding`:
 
 ```bash
-# PowerShell / CMD
+# PowerShell
 ai-agent run fire-coding --input "{\"message\":\"hello fire code\"}"
+
+# Windows CMD
+ai-agent run fire-coding --input "{""message"":""hello fire code""}"
 
 # Git Bash / WSL / macOS/Linux shells
 ai-agent run fire-coding --input '{"message":"hello fire code"}'
@@ -181,6 +187,20 @@ ai-agent run fire-coding --input '{"message":"hello fire code"}'
 # Using a file (works everywhere)
 echo {"message":"hello fire code"} > input.json
 ai-agent run fire-coding --file input.json
+```
+
+Multi-step workflow file example (`workflows/fire-coding.json`):
+
+```json
+{
+  "id": "fire-coding",
+  "name": "Fire Coding",
+  "steps": [
+    { "id": "analyze", "type": "agent", "agentId": "fire-coder" },
+    { "id": "plan", "type": "agent", "agentId": "fire-coder" },
+    { "id": "implement", "type": "agent", "agentId": "fire-coder" }
+  ]
+}
 ```
 
 ## Install and Upgrade
