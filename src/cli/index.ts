@@ -21,18 +21,19 @@ new WorkflowCLI(program)
 new ProjectCLI(program)
 new RunCLI(program)
 
-// Error handling
-program.exitOverride()
-
-try {
-  program.parse()
-} catch (err: unknown) {
-  const error = err as any
-  if (error?.code === "commander.unknownCommand") {
-    console.error(chalk.red(`Unknown command: ${String(error?.message || "")}`))
-    console.log(chalk.yellow("Run 'ai-agent --help' to see available commands"))
-  } else {
-    console.error(chalk.red("Error:"), String(error?.message || error))
+// Error handling: override only for real errors; allow --help/--version to exit cleanly
+program.exitOverride((err) => {
+  const code = (err as any)?.code
+  if (code === "commander.helpDisplayed" || code === "commander.version") {
+    process.exit(0)
   }
+  if (code === "commander.unknownCommand") {
+    console.error(chalk.red(`Unknown command: ${String((err as any)?.message || "")}`))
+    console.log(chalk.yellow("Run 'ai-agent --help' to see available commands"))
+    process.exit(1)
+  }
+  console.error(chalk.red("Error:"), String((err as any)?.message || err))
   process.exit(1)
-}
+})
+
+program.parse()
