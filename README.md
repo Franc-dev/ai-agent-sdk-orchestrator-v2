@@ -81,6 +81,16 @@ ai-agent open --url https://example.com
 ai-agent open --path C:\\some\\folder
 ```
 
+Authenticate providers (set API keys):
+
+```bash
+# Set OpenRouter API key into .env at project root
+ai-agent auth set-openrouter sk-or-v1-...
+
+# Show configured keys (masked)
+ai-agent auth show
+```
+
 Agents and workflows:
 
 ```bash

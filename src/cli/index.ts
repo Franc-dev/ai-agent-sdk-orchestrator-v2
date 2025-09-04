@@ -7,6 +7,7 @@ import { WorkflowCLI } from "./commands/workflow"
 import { ProjectCLI } from "./commands/project"
 import { RunCLI } from "./commands/run"
 import { OpenCLI } from "./commands/open"
+import { AuthCLI } from "./commands/auth"
 
 const program = new Command()
 
@@ -24,6 +25,7 @@ new WorkflowCLI(program)
 new ProjectCLI(program)
 new RunCLI(program)
 new OpenCLI(program)
+new AuthCLI(program)
 
 // Error handling: override only for real errors; allow --help/--version to exit cleanly
 program.exitOverride((err) => {
