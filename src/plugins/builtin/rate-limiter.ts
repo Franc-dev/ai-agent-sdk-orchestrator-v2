@@ -32,7 +32,8 @@ export class RateLimiterPlugin extends BasePlugin {
   private keyGenerator: (agentId: string, context: ExecutionContext) => string
 
   constructor(config: RateLimiterConfig = {}) {
-    super(RateLimiterPlugin.metadata, config)
+    const meta = (RateLimiterPlugin as any).metadata || { name: "rate-limiter", version: "1.0.0" }
+    super(meta, config)
 
     this.requestsPerMinute = this.getOption("requestsPerMinute", 60)
     this.requestsPerHour = this.getOption("requestsPerHour", 1000)
@@ -44,7 +45,7 @@ export class RateLimiterPlugin extends BasePlugin {
     this.orchestrator = orchestrator
 
     // Cleanup expired entries every minute
-    setInterval(() => this.cleanup(), 60000)
+    setInterval(() => this.pruneExpired(), 60000)
   }
 
   async beforeAgentExecution(
@@ -116,7 +117,7 @@ export class RateLimiterPlugin extends BasePlugin {
     }
   }
 
-  private cleanup(): void {
+  private pruneExpired(): void {
     const now = Date.now()
     for (const [key, entry] of this.limits.entries()) {
       // Remove entries that are past both reset times
@@ -159,7 +160,7 @@ export class RateLimiterPlugin extends BasePlugin {
     }
   }
 
-  async cleanup(): Promise<void> {
+  override async cleanup(): Promise<void> {
     this.limits.clear()
   }
 }

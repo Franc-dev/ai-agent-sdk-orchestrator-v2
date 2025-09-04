@@ -46,8 +46,10 @@ export class Tracer {
 
     // Maintain max spans limit
     if (this.spans.size > this.maxSpans) {
-      const oldestSpanId = this.spans.keys().next().value
-      this.spans.delete(oldestSpanId)
+      const oldestSpanId = this.spans.keys().next().value as string | undefined
+      if (oldestSpanId !== undefined) {
+        this.spans.delete(oldestSpanId)
+      }
     }
 
     return span

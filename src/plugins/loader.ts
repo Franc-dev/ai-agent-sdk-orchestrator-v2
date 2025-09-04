@@ -32,7 +32,7 @@ export class PluginLoader {
     // Try to load from file system
     try {
       pluginModule = await this.loadModule(nameOrPath)
-    } catch (error) {
+    } catch (err: unknown) {
       // Try to find plugin in search paths
       pluginModule = await this.findAndLoadPlugin(nameOrPath)
     }
@@ -48,7 +48,9 @@ export class PluginLoader {
     }
 
     // Register plugin if not already registered
-    if (!PluginRegistry.has(PluginConstructor.metadata.name)) {
+    const meta = PluginConstructor.metadata
+    const name = meta?.name || (PluginConstructor as any).name
+    if (!PluginRegistry.has(name)) {
       PluginRegistry.register(PluginConstructor)
     }
 
@@ -69,13 +71,15 @@ export class PluginLoader {
           try {
             const plugin = await this.loadPlugin(filePath)
             plugins.push(plugin)
-          } catch (error) {
-            console.warn(`Failed to load plugin from ${filePath}:`, error.message)
+          } catch (err: unknown) {
+            const error = err as Error
+            console.warn(`Failed to load plugin from ${filePath}:`, error?.message || err)
           }
         }
       }
-    } catch (error) {
-      console.warn(`Failed to read plugin directory ${directory}:`, error.message)
+    } catch (err: unknown) {
+      const error = err as Error
+      console.warn(`Failed to read plugin directory ${directory}:`, error?.message || err)
     }
 
     return plugins

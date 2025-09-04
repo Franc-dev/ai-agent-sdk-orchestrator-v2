@@ -3,15 +3,17 @@ import { Logger } from "./logger"
 import { MetricsCollector } from "./metrics"
 import { Tracer } from "./tracer"
 
+type AlertThresholds = {
+  errorRate: number
+  responseTime: number
+  memoryUsage: number
+}
+
 export interface MonitorConfig {
   enableMetrics?: boolean
   enableTracing?: boolean
   enableLogging?: boolean
-  alertThresholds?: {
-    errorRate?: number
-    responseTime?: number
-    memoryUsage?: number
-  }
+  alertThresholds?: Partial<AlertThresholds>
 }
 
 export interface Alert {
@@ -24,7 +26,7 @@ export interface Alert {
 }
 
 export class Monitor extends EventEmitter {
-  private config: Required<MonitorConfig>
+  private config: Omit<Required<MonitorConfig>, "alertThresholds"> & { alertThresholds: AlertThresholds }
   private logger: Logger
   private metrics: MetricsCollector
   private tracer: Tracer
@@ -42,7 +44,6 @@ export class Monitor extends EventEmitter {
         errorRate: config.alertThresholds?.errorRate ?? 0.05, // 5%
         responseTime: config.alertThresholds?.responseTime ?? 5000, // 5s
         memoryUsage: config.alertThresholds?.memoryUsage ?? 0.8, // 80%
-        ...config.alertThresholds,
       },
     }
 
@@ -100,7 +101,7 @@ export class Monitor extends EventEmitter {
 
   private checkResponseTime(): void {
     const responseTimeSummary = this.metrics.getSummary("response_time")
-    if (responseTimeSummary && responseTimeSummary.p95 > this.config.alertThresholds.responseTime) {
+    if (responseTimeSummary?.p95 !== undefined && responseTimeSummary.p95 > this.config.alertThresholds.responseTime) {
       this.createAlert({
         type: "response_time",
         message: `High response time detected: P95 ${responseTimeSummary.p95}ms`,
@@ -237,7 +238,7 @@ export class Monitor extends EventEmitter {
 
   private checkResponseTimeHealth(): boolean {
     const summary = this.metrics.getSummary("response_time")
-    return !summary || summary.p95 <= this.config.alertThresholds.responseTime
+    return !summary || summary.p95 === undefined || summary.p95 <= this.config.alertThresholds.responseTime
   }
 
   private checkMemoryHealth(): boolean {

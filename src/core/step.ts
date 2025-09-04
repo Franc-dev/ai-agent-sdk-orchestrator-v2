@@ -5,13 +5,13 @@ export class Step {
   public readonly id: string
   public readonly name: string
   public readonly type: StepConfig["type"]
-  public readonly agentId?: string
-  public readonly toolName?: string
-  public readonly condition?: (context: ExecutionContext) => boolean
-  public readonly iterations?: number
-  public readonly steps?: Step[]
-  public readonly onSuccess?: string
-  public readonly onFailure?: string
+  public readonly agentId: string | undefined
+  public readonly toolName: string | undefined
+  public readonly condition: ((context: ExecutionContext) => boolean) | undefined
+  public readonly iterations: number | undefined
+  public readonly steps: Step[] | undefined
+  public readonly onSuccess: string | undefined
+  public readonly onFailure: string | undefined
   public readonly retryConfig: { maxAttempts: number; backoffMs: number }
 
   private logger: Logger
@@ -35,7 +35,7 @@ export class Step {
       backoffMs: 1000,
     }
 
-    this.logger = new Logger("info")
+    this.logger = new Logger({ level: "info" })
   }
 
   async execute(input: any, context: ExecutionContext, orchestrator: any): Promise<any> {
@@ -85,13 +85,14 @@ export class Step {
       })
 
       return result
-    } catch (error) {
-      executionStep.error = error as Error
+    } catch (err: unknown) {
+      const error = err as Error
+      executionStep.error = error
       executionStep.endTime = new Date()
       executionStep.duration = executionStep.endTime.getTime() - executionStep.startTime.getTime()
 
       this.logger.error(`Step ${this.id} failed`, {
-        error: error.message,
+        error: error?.message,
         duration: executionStep.duration,
       })
 
@@ -187,8 +188,8 @@ export class Step {
       try {
         const result = await step.execute(input, context, orchestrator)
         return { stepId: step.id, result, error: null }
-      } catch (error) {
-        return { stepId: step.id, result: null, error }
+      } catch (err: unknown) {
+        return { stepId: step.id, result: null, error: err as Error }
       }
     })
 

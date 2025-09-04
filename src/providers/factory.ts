@@ -1,8 +1,6 @@
 import type { ModelConfig } from "../types"
 import type { BaseModelProvider } from "./base"
 import { OpenRouterProvider } from "./openrouter"
-import { VercelProvider } from "./vercel"
-import { OpenAIProvider } from "./openai"
 import { CustomProvider, type CustomProviderConfig } from "./custom"
 
 export class ModelProviderFactory {
@@ -11,9 +9,9 @@ export class ModelProviderFactory {
       case "openrouter":
         return new OpenRouterProvider(config)
       case "vercel":
-        return new VercelProvider(config)
+        throw new Error("Vercel provider has been removed. Use openrouter.")
       case "openai":
-        return new OpenAIProvider(config)
+        throw new Error("OpenAI provider has been removed. Use openrouter.")
       case "custom":
         if (!("custom" in config)) {
           throw new Error("Custom provider configuration required for custom provider")
@@ -25,7 +23,7 @@ export class ModelProviderFactory {
   }
 
   static getSupportedProviders(): string[] {
-    return ["openrouter", "vercel", "openai", "custom"]
+    return ["openrouter", "custom"]
   }
 
   static validateConfig(config: ModelConfig): void {
@@ -44,14 +42,8 @@ export class ModelProviderFactory {
     // Provider-specific validation
     switch (config.provider) {
       case "openrouter":
-      case "openai":
         if (!config.apiKey) {
           throw new Error(`API key is required for ${config.provider}`)
-        }
-        break
-      case "vercel":
-        if (!config.apiKey) {
-          throw new Error("API key is required for Vercel AI Gateway")
         }
         break
       case "custom":

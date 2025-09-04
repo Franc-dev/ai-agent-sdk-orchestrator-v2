@@ -66,25 +66,21 @@ export class ConsoleExporter extends BaseExporter {
   }
 
   private groupMetricsByName(metrics: Metric[]): Record<string, Metric[]> {
-    return metrics.reduce(
-      (acc, metric) => {
-        if (!acc[metric.name]) acc[metric.name] = []
-        acc[metric.name].push(metric)
-        return acc
-      },
-      {} as Record<string, Metric[]>,
-    )
+    const out: Record<string, Metric[]> = {}
+    for (const metric of metrics) {
+      if (!out[metric.name]) out[metric.name] = []
+      out[metric.name]!.push(metric)
+    }
+    return out
   }
 
   private groupSpansByTrace(spans: Span[]): Record<string, Span[]> {
-    return spans.reduce(
-      (acc, span) => {
-        if (!acc[span.traceId]) acc[span.traceId] = []
-        acc[span.traceId].push(span)
-        return acc
-      },
-      {} as Record<string, Span[]>,
-    )
+    const out: Record<string, Span[]> = {}
+    for (const span of spans) {
+      if (!out[span.traceId]) out[span.traceId] = []
+      out[span.traceId]!.push(span)
+    }
+    return out
   }
 }
 
@@ -111,7 +107,7 @@ export class PrometheusExporter extends BaseExporter {
       (acc, metric) => {
         const key = `${metric.name}_${metric.type}`
         if (!acc[key]) acc[key] = []
-        acc[key].push(metric)
+        acc[key]!.push(metric)
         return acc
       },
       {} as Record<string, Metric[]>,
@@ -121,7 +117,7 @@ export class PrometheusExporter extends BaseExporter {
       const [name, type] = key.split("_")
       console.log(`# TYPE ${name} ${type}`)
 
-      metricList.forEach((metric) => {
+      metricList!.forEach((metric) => {
         const tagsStr = metric.tags
           ? `{${Object.entries(metric.tags)
               .map(([k, v]) => `${k}="${v}"`)

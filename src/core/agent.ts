@@ -5,9 +5,9 @@ import { Logger } from "../utils/logger"
 export class Agent {
   public readonly id: string
   public readonly name: string
-  public readonly description?: string
+  public readonly description: string | undefined
   public readonly model: ModelConfig
-  public readonly systemPrompt?: string
+  public readonly systemPrompt: string | undefined
   public readonly temperature: number
   public readonly maxTokens: number
   public readonly tools: Map<string, ToolConfig>
@@ -37,7 +37,7 @@ export class Agent {
       backoffMs: 1000,
     }
 
-    this.logger = new Logger("info")
+    this.logger = new Logger({ level: "info" })
     this.modelProvider = ModelProviderFactory.create(this.model)
   }
 
@@ -63,9 +63,10 @@ export class Agent {
       this.logger.info(`Agent ${this.id} completed`, { duration, tokens: result.tokens })
 
       return result
-    } catch (error) {
+    } catch (err: unknown) {
+      const error = err as Error
       const duration = Date.now() - startTime
-      this.logger.error(`Agent ${this.id} failed`, { error: error.message, duration })
+      this.logger.error(`Agent ${this.id} failed`, { error: error?.message, duration })
       throw error
     }
   }
@@ -83,8 +84,9 @@ export class Agent {
       for await (const chunk of stream) {
         yield chunk
       }
-    } catch (error) {
-      this.logger.error(`Agent ${this.id} stream failed`, { error: error.message })
+    } catch (err: unknown) {
+      const error = err as Error
+      this.logger.error(`Agent ${this.id} stream failed`, { error: error?.message })
       throw error
     }
   }
@@ -145,10 +147,11 @@ export class Agent {
           toolCalls,
           tokens: this.modelProvider.getLastTokenUsage?.(),
         }
-      } catch (error) {
-        lastError = error as Error
+      } catch (err: unknown) {
+        const error = err as Error
+        lastError = error
         this.logger.warn(`Agent ${this.id} attempt ${attempt} failed`, {
-          error: error.message,
+          error: error?.message,
           attempt,
           maxAttempts: this.retryConfig.maxAttempts,
         })
@@ -170,17 +173,18 @@ export class Agent {
     let match
 
     while ((match = toolCallPattern.exec(response)) !== null) {
-      const [, toolName, argsStr] = match
+      const [, toolName, argsStr] = match as unknown as [string, string, string]
       const tool = this.tools.get(toolName)
 
       if (tool) {
         try {
-          const args = JSON.parse(argsStr)
+          const args = JSON.parse(argsStr || "{}")
           const result = await tool.handler(args, context)
           toolCalls.push({ tool: toolName, args, result })
-        } catch (error) {
-          this.logger.error(`Tool ${toolName} execution failed`, { error: error.message })
-          toolCalls.push({ tool: toolName, error: error.message })
+        } catch (err: unknown) {
+          const error = err as Error
+          this.logger.error(`Tool ${toolName} execution failed`, { error: error?.message })
+          toolCalls.push({ tool: toolName, error: error?.message })
         }
       }
     }

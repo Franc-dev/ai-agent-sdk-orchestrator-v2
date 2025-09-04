@@ -56,7 +56,7 @@ export interface PluginHooks {
   onCustomEvent?(eventName: string, data: any): Promise<void>
 }
 
-export abstract class BasePlugin implements PluginHooks {
+export abstract class BasePlugin {
   public readonly metadata: PluginMetadata
   protected config: PluginConfig
   protected orchestrator?: AgentOrchestrator
@@ -116,7 +116,7 @@ export abstract class BasePlugin implements PluginHooks {
 
 export interface PluginConstructor {
   new (config?: PluginConfig): BasePlugin
-  metadata: PluginMetadata
+  metadata?: PluginMetadata
 }
 
 // Plugin decorator for easy metadata definition

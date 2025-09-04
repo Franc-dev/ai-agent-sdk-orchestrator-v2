@@ -2,7 +2,9 @@ import { promises as fs } from "fs"
 import { join } from "path"
 import inquirer from "inquirer"
 import { BaseCLI } from "./base"
-import { AgentOrchestrator, Agent, Workflow } from "../../core"
+import { AgentOrchestrator } from "../../core/orchestrator"
+import { Agent } from "../../core/agent"
+import { Workflow } from "../../core/workflow"
 
 export class RunCLI extends BaseCLI {
   protected setupCommands(): void {
@@ -203,9 +205,10 @@ export class RunCLI extends BaseCLI {
           if (conversationHistory.length > 10) {
             conversationHistory.shift()
           }
-        } catch (error) {
+        } catch (err: unknown) {
           chatSpinner.fail()
-          this.error(`Error: ${error.message}`)
+          const error = err as Error
+          this.error(`Error: ${error?.message ?? String(err)}`)
         }
       }
     } catch (error) {

@@ -26,7 +26,8 @@ export class MetricsPlugin extends BasePlugin {
   private collectPerformanceMetrics: boolean
 
   constructor(config: MetricsConfig = {}) {
-    super(MetricsPlugin.metadata, config)
+    const meta = (MetricsPlugin as any).metadata || { name: "metrics", version: "1.0.0" }
+    super(meta, config)
 
     this.metrics = new MetricsCollector()
     this.collectAgentMetrics = this.getOption("collectAgentMetrics", true)
@@ -136,7 +137,7 @@ export class MetricsPlugin extends BasePlugin {
     return this.metrics.export()
   }
 
-  async cleanup(): Promise<void> {
+  override async cleanup(): Promise<void> {
     this.metrics.clear()
   }
 }

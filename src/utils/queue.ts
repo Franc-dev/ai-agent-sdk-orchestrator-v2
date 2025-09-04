@@ -20,7 +20,8 @@ export class TaskQueue {
   }
 
   async add<T>(task: () => Promise<T>, priority = 0): Promise<T> {
-    return this.queue.add(task, { priority })
+    const result = await this.queue.add(task, { priority })
+    return result as T
   }
 
   get size(): number {

@@ -23,7 +23,9 @@ export class CachePlugin extends BasePlugin {
   private keyGenerator: (agentId: string, prompt: string) => string
 
   constructor(config: CacheConfig = {}) {
-    super(CachePlugin.metadata, config)
+    // Use decorator-attached metadata if present; fallback to inline
+    const meta = (CachePlugin as any).metadata || { name: "cache", version: "1.0.0" }
+    super(meta, config)
 
     this.maxSize = this.getOption("maxSize", 1000)
     this.ttlMs = this.getOption("ttlMs", 300000) // 5 minutes
@@ -82,12 +84,14 @@ export class CachePlugin extends BasePlugin {
 
   private set(key: string, value: any): void {
     // Remove expired entries
-    this.cleanup()
+    this.pruneExpired()
 
     // Remove oldest entries if at max size
     if (this.cache.size >= this.maxSize) {
-      const oldestKey = this.cache.keys().next().value
-      this.cache.delete(oldestKey)
+      const oldestKey = this.cache.keys().next().value as string | undefined
+      if (oldestKey !== undefined) {
+        this.cache.delete(oldestKey)
+      }
     }
 
     this.cache.set(key, {
@@ -111,7 +115,7 @@ export class CachePlugin extends BasePlugin {
     return entry.value
   }
 
-  private cleanup(): void {
+  private pruneExpired(): void {
     const now = Date.now()
     for (const [key, entry] of this.cache.entries()) {
       if (now - entry.timestamp > this.ttlMs) {
@@ -133,7 +137,7 @@ export class CachePlugin extends BasePlugin {
     }
   }
 
-  async cleanup(): Promise<void> {
+  override async cleanup(): Promise<void> {
     this.clear()
   }
 }

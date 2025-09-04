@@ -92,4 +92,5 @@ export interface GenerationOptions {
   presencePenalty?: number
   stop?: string[]
   timeout?: number
+  stream?: boolean
 }

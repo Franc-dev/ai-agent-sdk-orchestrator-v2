@@ -120,15 +120,13 @@ export class PluginManager extends EventEmitter {
     ]
 
     hookMethods.forEach((hookName) => {
-      if (typeof plugin[hookName] === "function") {
+      const maybeFn = (plugin as unknown as Record<string, unknown>)[hookName]
+      if (typeof maybeFn === "function") {
         if (!this.hooks.has(hookName)) {
           this.hooks.set(hookName, [])
         }
 
-        this.hooks.get(hookName)!.push({
-          plugin,
-          priority: plugin.getPriority(),
-        })
+        this.hooks.get(hookName)!.push({ plugin, priority: plugin.getPriority() })
 
         // Sort by priority (higher priority first)
         this.hooks.get(hookName)!.sort((a, b) => b.priority - a.priority)
@@ -148,9 +146,9 @@ export class PluginManager extends EventEmitter {
   }
 
   // Hook execution
-  async executeHook<T extends keyof PluginHooks>(
-    hookName: T,
-    ...args: Parameters<NonNullable<PluginHooks[T]>>
+  async executeHook(
+    hookName: keyof PluginHooks,
+    ...args: any[]
   ): Promise<any> {
     const hookList = this.hooks.get(hookName)
     if (!hookList || hookList.length === 0) {
@@ -165,7 +163,9 @@ export class PluginManager extends EventEmitter {
       }
 
       try {
-        const hookMethod = plugin[hookName] as any
+        const hookMethod = (plugin as unknown as Record<string, unknown>)[hookName] as
+          | ((...a: any[]) => any)
+          | undefined
         if (hookMethod) {
           const hookResult = await hookMethod.apply(plugin, args)
           if (hookResult !== undefined) {
@@ -176,10 +176,11 @@ export class PluginManager extends EventEmitter {
             }
           }
         }
-      } catch (error) {
+      } catch (err: unknown) {
+        const error = err as Error
         this.logger.error(`Hook execution failed: ${hookName}`, {
           plugin: plugin.toString(),
-          error: error.message,
+          error: error?.message,
         })
 
         // Continue with other hooks unless it's an error hook
@@ -271,9 +272,10 @@ export class PluginManager extends EventEmitter {
       if (plugin.cleanup) {
         try {
           await plugin.cleanup()
-        } catch (error) {
+        } catch (err: unknown) {
+          const error = err as Error
           this.logger.error(`Plugin cleanup failed: ${plugin.toString()}`, {
-            error: error.message,
+            error: error?.message ?? String(err),
           })
         }
       }

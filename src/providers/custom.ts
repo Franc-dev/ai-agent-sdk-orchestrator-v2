@@ -32,18 +32,18 @@ export class CustomProvider extends BaseModelProvider {
       timeout: options.timeout,
     })
 
-    const data = await response.json()
+    const data: any = await response.json()
 
-    if (data.error) {
+    if (data?.error) {
       throw new Error(`Custom provider error: ${data.error.message || data.error}`)
     }
 
     const text = this.customConfig.responseTransformer
       ? this.customConfig.responseTransformer(data)
-      : data.text || data.completion || data.response
+      : data?.text || data?.completion || data?.response
 
     // Set token usage if available
-    if (data.usage) {
+    if (data?.usage) {
       this.setLastTokenUsage(this.parseTokenUsage(data.usage)!)
     }
 

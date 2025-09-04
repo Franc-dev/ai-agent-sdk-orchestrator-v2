@@ -2,7 +2,8 @@ import { promises as fs } from "fs"
 import { join } from "path"
 import inquirer from "inquirer"
 import { BaseCLI } from "./base"
-import { AgentOrchestrator, Agent } from "../../core"
+import { AgentOrchestrator } from "../../core/orchestrator"
+import { Agent } from "../../core/agent"
 
 export class AgentCLI extends BaseCLI {
   protected setupCommands(): void {
@@ -221,9 +222,10 @@ export class AgentCLI extends BaseCLI {
             console.log("─".repeat(40))
             console.log(result.response)
             console.log()
-          } catch (error) {
+          } catch (err: unknown) {
             testSpinner.fail()
-            this.error(`Error: ${error.message}`)
+            const error = err as Error
+            this.error(`Error: ${error?.message ?? String(err)}`)
           }
         }
       } else {

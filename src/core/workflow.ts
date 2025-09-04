@@ -5,7 +5,7 @@ import { Logger } from "../utils/logger"
 export class Workflow {
   public readonly id: string
   public readonly name: string
-  public readonly description?: string
+  public readonly description: string | undefined
   public readonly steps: Step[]
   public readonly parallel: boolean
   public readonly retryConfig: { maxAttempts: number; backoffMs: number }
@@ -24,7 +24,7 @@ export class Workflow {
       backoffMs: 1000,
     }
 
-    this.logger = new Logger("info")
+    this.logger = new Logger({ level: "info" })
   }
 
   async execute(context: ExecutionContext, orchestrator: any): Promise<any> {
@@ -51,10 +51,11 @@ export class Workflow {
       })
 
       return result
-    } catch (error) {
+    } catch (err: unknown) {
+      const error = err as Error
       const duration = Date.now() - startTime
       this.logger.error(`Workflow ${this.id} failed`, {
-        error: error.message,
+        error: error?.message,
         duration,
         completedSteps: context.history.length,
       })
@@ -75,8 +76,9 @@ export class Workflow {
         lastResult = stepResult
 
         this.logger.debug(`Step ${step.id} completed`, { result: typeof stepResult })
-      } catch (error) {
-        this.logger.error(`Step ${step.id} failed`, { error: error.message })
+      } catch (err: unknown) {
+        const error = err as Error
+        this.logger.error(`Step ${step.id} failed`, { error: error?.message })
 
         // Handle step failure based on configuration
         if (step.onFailure) {
@@ -101,8 +103,8 @@ export class Workflow {
         const stepContext = { ...context, stepId: step.id }
         const result = await step.execute(context.variables.input, stepContext, orchestrator)
         return { stepId: step.id, result, error: null }
-      } catch (error) {
-        return { stepId: step.id, result: null, error }
+      } catch (err: unknown) {
+        return { stepId: step.id, result: null, error: err as Error }
       }
     })
 

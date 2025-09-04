@@ -1,10 +1,7 @@
-#!/usr/bin/env node
-
 import { Command } from "commander"
 import chalk from "chalk"
 import { AgentCLI } from "./commands/agent"
 import { WorkflowCLI } from "./commands/workflow"
-import { PluginCLI } from "./commands/plugin"
 import { ProjectCLI } from "./commands/project"
 import { RunCLI } from "./commands/run"
 
@@ -21,7 +18,6 @@ program
 // Register command groups
 new AgentCLI(program)
 new WorkflowCLI(program)
-new PluginCLI(program)
 new ProjectCLI(program)
 new RunCLI(program)
 
@@ -30,12 +26,13 @@ program.exitOverride()
 
 try {
   program.parse()
-} catch (error) {
-  if (error.code === "commander.unknownCommand") {
-    console.error(chalk.red(`Unknown command: ${error.message}`))
+} catch (err: unknown) {
+  const error = err as any
+  if (error?.code === "commander.unknownCommand") {
+    console.error(chalk.red(`Unknown command: ${String(error?.message || "")}`))
     console.log(chalk.yellow("Run 'ai-agent --help' to see available commands"))
   } else {
-    console.error(chalk.red("Error:"), error.message)
+    console.error(chalk.red("Error:"), String(error?.message || error))
   }
   process.exit(1)
 }

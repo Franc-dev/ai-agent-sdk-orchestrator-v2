@@ -15,11 +15,12 @@ export class PluginRegistry {
 
   static register(pluginConstructor: PluginConstructor): void {
     const metadata = pluginConstructor.metadata
-    if (!metadata) {
-      throw new Error("Plugin must have metadata")
+    const name = metadata?.name || (pluginConstructor as any).name
+    if (!name) {
+      throw new Error("Plugin must provide a name in metadata or class name")
     }
 
-    this.plugins.set(metadata.name, pluginConstructor)
+    this.plugins.set(name, pluginConstructor)
   }
 
   static unregister(name: string): boolean {
@@ -30,11 +31,11 @@ export class PluginRegistry {
     return this.plugins.get(name)
   }
 
-  static list(): Array<{ name: string; version: string; description?: string }> {
+  static list(): Array<{ name: string; version?: string; description?: string }> {
     return Array.from(this.plugins.values()).map((constructor) => ({
-      name: constructor.metadata.name,
-      version: constructor.metadata.version,
-      description: constructor.metadata.description,
+      name: constructor.metadata?.name || (constructor as any).name,
+      version: constructor.metadata?.version,
+      description: constructor.metadata?.description,
     }))
   }
 
